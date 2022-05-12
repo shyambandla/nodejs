@@ -74,7 +74,7 @@ httpServer.listen(3000);
 
   await subscriber.subscribe('shyam', (message) => {
     console.log(message); // 'message'
-    io_admin.sockets.emit(message.split("?")[0],message.split("?")[1]);
+    io_admin.sockets.emit(message.split("@")[0],message.split("@")[1]);
     const now = Date.now(); // Unix timestamp in milliseconds
 console.log( now );
   });
