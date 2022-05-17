@@ -3,7 +3,9 @@ const { createServer } = require("http");
 const { Server } = require("socket.io");
 var intrinioSDK = require('intrinio-sdk');
 const redis = require('redis');
-
+const uWS = require('uWebSockets.js');
+const { StringDecoder } = require('string_decoder');
+const decoder = new StringDecoder('utf8');
 intrinioSDK.ApiClient.instance.authentications['ApiKeyAuth'].apiKey = "OmRkNjFkMmJhZmMwZWFjYTc0Y2FlYWFkYjEwOTcyZWM5";
 intrinioSDK.ApiClient.instance.enableRetries = true;
 var options = new intrinioSDK.OptionsApi();
@@ -11,27 +13,27 @@ var options = new intrinioSDK.OptionsApi();
 var opts = { 
   'source': null
 };
-const app = express();
+// const app = express();
+//  global.websocket=null;
+// const httpServer = createServer(app);
+// const io_admin = new Server(httpServer, {
+//     cors: {
+//       origin: "*",
+//       methods: ["GET", "POST"]
+//     },
+//     transports: ["websocket"] ,
+//     wsEngine: require("eiows").Server
+//   });
+//   const jwtAuth = require('socketio-jwt-auth');
+//   const { io } = require("socket.io-client");
+// const { exit } = require("process");
+//   const socket=io();
 
-const httpServer = createServer(app);
-const io_admin = new Server(httpServer, {
-    cors: {
-      origin: "*",
-      methods: ["GET", "POST"]
-    },
-    transports: ["websocket"] ,
-    wsEngine: require("eiows").Server
-  });
-  const jwtAuth = require('socketio-jwt-auth');
-  const { io } = require("socket.io-client");
-const { exit } = require("process");
-  const socket=io();
-
-io_admin.on("connection", (socket) => {
-  // ...
-  console.log("connected");
+// io_admin.on("connection", (socket) => {
+//   // ...
+//   console.log("connected");
   
-});
+// });
 
 const getData=()=>{
     options.getUnusualActivityUniversal(opts).then(function(data) {
@@ -58,9 +60,27 @@ const getData=()=>{
 
 
 
-httpServer.listen(3000);
+// httpServer.listen(3000);
 
-
+let wapp=uWS.App().ws('/*', {
+	message: (ws, message, isBinary) => {
+    
+		/* Parse JSON and perform the action */
+		let json = JSON.parse(decoder.write(Buffer.from(message)));
+		switch (json.action) {
+			case 'sub': {
+				/* Subscribe to the share's value stream */
+				ws.subscribe(json.symbol);
+        console.log(json.symbol);
+				break;
+			}
+		}
+	}
+}).listen(9001, (listenSocket) => {
+	if (listenSocket) {
+		console.log('Listening to port 9001');
+	}
+});
 
 (async () => {
 
@@ -73,10 +93,20 @@ httpServer.listen(3000);
   await subscriber.connect();
 
   await subscriber.subscribe('shyam', (message) => {
-    console.log(message); // 'message'
-    io_admin.sockets.emit(message.split("@")[0],message.split("@")[1]);
-    const now = Date.now(); // Unix timestamp in milliseconds
-console.log( now );
+    // console.log(message); // 'message'
+    // io_admin.sockets.emit(message.split("@")[0],message.split("@")[1]);
+   
+      wapp.publish(message.split("@")[0],message.split ("@")[1]);
+    
+//     const now = Date.now(); // Unix timestamp in milliseconds
+// console.log( now );
   });
 
 })();
+
+
+
+
+
+
+
