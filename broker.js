@@ -4,7 +4,7 @@ const { createClient } = require("redis");
 
 const io = new Server();
 
-const pubClient = createClient({ url: "redis://159.223.127.139:6379" });
+const pubClient = createClient({ url: "redis://104.131.49.9:6379" });
 const subClient = pubClient.duplicate();
 
 io.adapter(createAdapter(pubClient, subClient,{key:"shyam"}));
