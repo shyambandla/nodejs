@@ -1,0 +1,13 @@
+config:
+  target: "ws://143.198.3.43:3000"
+  phases:
+    - duration: 20
+      arrivalRate: 1000
+
+scenarios:
+  - engine: ws
+    name: Echo a string
+    flow:
+      - connect: "{{ target }}"
+      - send: "eAMC"
+

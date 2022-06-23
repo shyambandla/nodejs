@@ -5,7 +5,7 @@ var intrinioSDK = require('intrinio-sdk');
 //const redis = require('redis');
 const Redis = require('ioredis');
 const redis = new Redis({
-    host: '161.35.135.239',
+    host: '108.61.158.158',
     port: 6379
 });
 
